@@ -1,0 +1,886 @@
+#LyX 1.6.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+\usetheme{Warsaw}
+% or ...
+
+\setbeamercovered{transparent}
+% or whatever (possibly just delete it)
+\end_preamble
+\use_default_options false
+\language english
+\inputencoding auto
+\font_roman times
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 2
+\use_esint 0
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Replacing Regular Expresions with Parsers
+\end_layout
+
+\begin_layout Subtitle
+Introduction to Treetop and Polygot
+\end_layout
+
+\begin_layout Author
+Marcin Raczkowski
+\end_layout
+
+\begin_layout Institute
+Railsdog LLC, netbird.pl
+\end_layout
+
+\begin_layout Date
+RuPy, Poznań 2009
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+If you wish to uncover everything in a step-wise fashion, uncomment the
+ following command:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\backslash
+beamerdefaultoverlayspecification{<+->}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Outline
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Structuring a talk is a difficult task and the following structure may not
+ be suitable.
+ Here are some rules that apply for this solution: 
+\end_layout
+
+\begin_layout Plain Layout
+- Exactly two or three sections (other than the summary).
+ 
+\end_layout
+
+\begin_layout Plain Layout
+- At *most* three subsections per section.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+- Talk about 30s to 2min per frame.
+ So there should be between about 15 and 30 frames, all told.
+\end_layout
+
+\begin_layout Plain Layout
+- A conference audience is likely to know very little of what you are going
+ to talk about.
+ So *simplify*! 
+\end_layout
+
+\begin_layout Plain Layout
+- In a 20min talk, getting the main ideas across is hard enough.
+ Leave out details, even if it means being less precise than you think necessary.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+- If you omit details that are vital to the proof/implementation, just say
+ so once.
+ Everybody will be happy with that.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Subsection
+About RegExps and PEGs
+\end_layout
+
+\begin_layout BeginFrame
+Regular Expressions and Parsing Expression Grammars
+\end_layout
+
+\begin_layout Itemize
+Both are derived from formal language theory
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+which is something really complicated
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Parsing Expression Grammars are generalization of Regular Expressions
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Pearl 6 rules - nested and named regular expressions
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Limited context sensitivity
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+limited look ahead in PEGs
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+A parsing expression grammar, or PEG, is a type of analytic formal grammar
+ that describes a formal language in terms of a set of rules for recognizing
+ strings in the language.
+ A parsing expression grammar essentially represents a recursive descent
+ parser in a pure schematic form that expresses only syntax and is independent
+ of the way an actual parser might be implemented or what it might be used
+ for.
+ Parsing expression grammars look similar to regular expressions or context-free
+ grammars (CFG) in Backus-Naur form (BNF) notation, but have a different
+ interpretation.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Problems with reguar expressions
+\end_layout
+
+\begin_layout BeginFrame
+Regular Expressions and Parsing Expression Grammars
+\end_layout
+
+\begin_layout Itemize
+Pairs of parenthesis
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Matching html tags
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Comments and String literals in most programming languages
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Recursion and nested rules
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+regular expressions can't check validity of regular expression, some come
+ close though:
+\end_layout
+
+\begin_layout Plain Layout
+/
+\backslash
+/(
+\backslash
+[^
+\backslash
+x00-
+\backslash
+x1f]|[(
+\backslash
+[^
+\backslash
+x00-
+\backslash
+x1f]|[^
+\backslash
+x00-
+\backslash
+x1f
+\backslash
+
+\backslash
+/])]|[^
+\backslash
+x00-
+\backslash
+x1f
+\backslash
+
+\backslash
+/[])+
+\backslash
+/[gim]/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Working with Parsing Expression Grammars
+\end_layout
+
+\begin_layout Subsection*
+minic.tt
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\scriptsize\ttfamily},numbers=left,showstringspaces=false,tabsize=4"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+grammar MiniC   
+\end_layout
+
+\begin_layout Plain Layout
+
+  rule code     
+\end_layout
+
+\begin_layout Plain Layout
+
+    (string_literal / s_comment / c_comment / .)+ <Code>
+\end_layout
+
+\begin_layout Plain Layout
+
+  end
+\end_layout
+
+\begin_layout Plain Layout
+
+  rule string_literal
+\end_layout
+
+\begin_layout Plain Layout
+
+    sql / dql
+\end_layout
+
+\begin_layout Plain Layout
+
+  end
+\end_layout
+
+\begin_layout Plain Layout
+
+  rule dql
+\end_layout
+
+\begin_layout Plain Layout
+
+    '"' (ec / (!'"' .))* '"' <StringLiteral>
+\end_layout
+
+\begin_layout Plain Layout
+
+  end
+\end_layout
+
+\begin_layout Plain Layout
+
+  rule sql
+\end_layout
+
+\begin_layout Plain Layout
+
+    "'" (ec / (!"'" .))* "'" <StringLiteral>
+\end_layout
+
+\begin_layout Plain Layout
+
+  end
+\end_layout
+
+\begin_layout Plain Layout
+
+  rule ec
+\end_layout
+
+\begin_layout Plain Layout
+
+    '
+\backslash
+
+\backslash
+' .
+\end_layout
+
+\begin_layout Plain Layout
+
+  end
+\end_layout
+
+\begin_layout Plain Layout
+
+  rule c_comment
+\end_layout
+
+\begin_layout Plain Layout
+
+    '/*' (!'*/' .
+ )* '*/' <Comment>
+\end_layout
+
+\begin_layout Plain Layout
+
+  end
+\end_layout
+
+\begin_layout Plain Layout
+
+  rule s_comment
+\end_layout
+
+\begin_layout Plain Layout
+
+    '//' (!"
+\backslash
+n" .)* <Comment>
+\end_layout
+
+\begin_layout Plain Layout
+
+  end
+\end_layout
+
+\begin_layout Plain Layout
+
+end
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Matching and Validation
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{frame}[fragile]{Matching And Validation}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=Ruby,numbers=left,tabsize=2]
+\end_layout
+
+\begin_layout Plain Layout
+
+parser = Treetop.load('minic.tt').new 
+\end_layout
+
+\begin_layout Plain Layout
+
+file = File.read('test.c').gsub(/
+\backslash
+
+\backslash
+
+\backslash
+n/m, "") 
+\end_layout
+
+\begin_layout Plain Layout
+
+if tree = parser.parse(file) 
+\end_layout
+
+\begin_layout Plain Layout
+
+  puts "YES! Finally!"
+\end_layout
+
+\begin_layout Plain Layout
+
+  first_comment = tree.all_elements.
+\end_layout
+
+\begin_layout Plain Layout
+
+    detect{|e| e.node_types.include?("Comment") }
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\end_layout
+
+\begin_layout Plain Layout
+
+  puts first_comment.interval  
+\end_layout
+
+\begin_layout Plain Layout
+
+else
+\end_layout
+
+\begin_layout Plain Layout
+
+  puts "argh, not again"
+\end_layout
+
+\begin_layout Plain Layout
+
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting} 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{frame}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Search and Replace
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{frame}[fragile]{Search And Replace}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[basicstyle={
+\backslash
+scriptsize},language=Ruby,numbers=left]
+\end_layout
+
+\begin_layout Plain Layout
+
+require 'base'
+\end_layout
+
+\begin_layout Plain Layout
+
+class Treetop::Runtime::SyntaxNode
+\end_layout
+
+\begin_layout Plain Layout
+
+  def gsub(node, with=nil, &block)
+\end_layout
+
+\begin_layout Plain Layout
+
+    if terminal?
+\end_layout
+
+\begin_layout Plain Layout
+
+     text_value
+\end_layout
+
+\begin_layout Plain Layout
+
+    elsif node_types.include?(node)
+\end_layout
+
+\begin_layout Plain Layout
+
+      with || block.call(self)
+\end_layout
+
+\begin_layout Plain Layout
+
+    else
+\end_layout
+
+\begin_layout Plain Layout
+
+      elements.map{|e| e.gsub(node, with, &block)}.join("")
+\end_layout
+
+\begin_layout Plain Layout
+
+    end
+\end_layout
+
+\begin_layout Plain Layout
+
+  end
+\end_layout
+
+\begin_layout Plain Layout
+
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+parser = Treetop.load('minic.tt').new
+\end_layout
+
+\begin_layout Plain Layout
+
+tree = parser.parse(File.read('test.c').gsub(/
+\backslash
+
+\backslash
+
+\backslash
+n/m, ""))
+\end_layout
+
+\begin_layout Plain Layout
+
+puts tree.gsub("Comment", '')
+\end_layout
+
+\begin_layout Plain Layout
+
+tree = parser.parse('a "123456789" b') 
+\end_layout
+
+\begin_layout Plain Layout
+
+puts tree.gsub("StringLiteral"){|n| "t("+n.text_value+")"}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting} 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{frame}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+handling recursion
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{frame}[fragile]{Recursion Handling}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[basicstyle={
+\backslash
+scriptsize},language=Ruby,numbers=left]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting} 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{frame}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Reular expressions in perl are evolving into PEGs see Perl6 rules http://en.wikip
+edia.org/wiki/Perl_6_rules 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Summary
+\end_layout
+
+\begin_layout BeginFrame
+Summary
+\end_layout
+
+\begin_layout Itemize
+The
+\color none
+ 
+\color red
+first main message
+\color none
+ of your talk in one or two lines.
+\end_layout
+
+\begin_layout Itemize
+The
+\color none
+ 
+\color red
+second main message
+\color none
+ of your talk in one or two lines.
+\end_layout
+
+\begin_layout Itemize
+Perhaps a
+\color none
+ 
+\color red
+third message
+\color none
+, but not more than that.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+An outlook is always optional.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+\start_of_appendix
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+All of the following is optional and typically not needed.
+\end_layout
+
+\end_inset
+
+Appendix
+\end_layout
+
+\begin_layout Subsection*
+For Further Reading
+\end_layout
+
+\begin_layout BeginFrame
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+[allowframebreaks]
+\end_layout
+
+\end_inset
+
+For Further Reading
+\end_layout
+
+\begin_layout Standard
+http://rubyconf2007.confreaks.com/d1t1p5_treetop.html
+\end_layout
+
+\begin_layout Standard
+http://treetop.rubyforge.org/
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\end_body
+\end_document

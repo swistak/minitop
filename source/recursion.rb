@@ -1,5 +1,4 @@
 require 'base'
-require 'sub'
 
 class Treetop::Runtime::SyntaxNode
   include Enumerable
@@ -20,14 +19,14 @@ end
 TOP
 
 parser = Treetop.load_from_string(list_grammar).new
-if tree = parser.parse('(1,(2,3,4),(5,6))')
+if tree = parser.parse('(11,(12,13,14),(15,16))')
   reverser = lambda{|n|
     atoms = [n.atom] + n.more_atoms.elements.map{|m| m.atom} 
     atoms.map{|m|
-      m.gsub("List", &reverser)
+      m.gsub("list", &reverser)
     }.reverse.join(",")
   }
-  puts tree.gsub("List", &reverser).to_s
+  puts tree.gsub("list", &reverser)
 else
   puts "buu"
 end

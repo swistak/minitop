@@ -1,19 +1,19 @@
 require 'rubygems'
 gem "treetop"
 require 'treetop'
-Polyglot.load '../grammars/regexp'
-Polyglot.load '../grammars/minitop'
 require 'pp'
 require '../misc/assert'
 require 'readline'
+require 'base'
 
-# i    Ignore case when matching text.
-# m    The pattern is to be matched against multiline text, so treat newline as an ordinary character: allow . to match newlines.
-# x    Extended syntax: allow whitespace and comments in regexp.
-# o     Perform #{} interpolations only once, the first time the regexp literal is evaluated.
-# u,e,s,n  Interpret the regexp as Unicode (UTF-8), EUC, SJIS, or ASCII. If none of these modifiers is specified, the regular expression is assumed to use the source encoding.
+module InlineRule
+  def serialize
+    "\nrule #{name}\n  #{definition}\nend\n"
+  end
+end
 
-map = {
+module SpecialCharacter
+  MAP = {
     "^" => "start_of_line",
     "$" => "end_of_line",
     '\A' => "start_of_string",
@@ -26,70 +26,35 @@ map = {
     '\W' => 'non_word',
     }
 
-module Minitop
-  module_function
-
-  module ParserExtension
-
-  end
-
-  def parse_expression(expression)
-    expression
-  end
-
-  def create_grammar_for(parsed_rule, grammar_name)
-    "grammar #{grammar_name}
-      include RegExpParser
-
-      rule match
-        #{parsed_rule}
-      end
-    end".gsub(/^ {4}/, '')
-  end
-
-  def get_mini_parser(expression)
-    parsed_expression = parse_expression(expression)
-    name = "GeneratedParser#{expression.hash.to_i.abs}"
-    grammar = create_grammar_for(parsed_expression, name)
-    File.open("last_generated_parser.tt", "w"){|f| f.write(grammar)}
-
-    Treetop.load_from_string(grammar)
-
-    parser_class = Kernel.const_get(name+"Parser")
-    parser = parser_class.new
-    parser.extend(Minitop::ParserExtension)
-    parser
+  def serialize
+    MAP[text_value] || ""
   end
 end
 
+Treetop.load('../grammars/common.tt')
 
-def P(expression)
-  Minitop.get_mini_parser(expression)
-end
+grammar = <<START
+grammar MinitopParser
+  include Common
 
-mt = MinitopParser.new
+  rule expression
+    (inline_rule / special_character / string)+ {}
+  end
 
-assert{ mt.parse('\d+') }
-assert{ mt.parse('\d+\w') }
-assert{ mt.parse('(\d+\w)') }
-assert{ mt.parse('<\d+\w>') }
-assert{ mt.parse('(\\d+\w)') }
-assert{ mt.parse('(\\[da.]+\w)') }
-assert{ mt.parse('(\\[^da.]+\w)') }
+  rule inline_rule
+    name:(character word+) white_space? ':' white_space? definition:(!'\\n' .)+ '\\n' <InlineRule>
+  end
 
+  rule special_character
+    ('\\S' / '\\s' / '\\W' / '\\w' / '\\A' / '\\D' / '\\d' / '\\z' / '$' / '^') <SpecialCharacter>
+  end
 
-
-loop do
-  line = Readline::readline('> ')
-  Readline::HISTORY.push(line)
-  if line.strip == 'reload!'
-    load(__FILE__)
-  elsif line.strip == 'exit'
-    exit
-  elsif res = mt.parse(line)
-    puts res.to_s
-    pp res
-  else
-    puts "could not parse"
+  rule string
+    (![\n\\\\] .)+ { def serialize; ' "'+text_value+'" '; end }
   end
 end
+START
+
+mt = Treetop.load_from_string(grammar).new
+tree = mt.parse('foo\d+\W')
+puts tree.serialize
