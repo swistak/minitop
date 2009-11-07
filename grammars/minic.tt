@@ -1,0 +1,33 @@
+grammar MiniC
+  rule code
+    (string_literal / s_comment / c_comment / other)+ <Code>
+  end
+
+  rule other
+     (![/'"] .)+ / .
+  end
+
+  rule string_literal
+    sql / dql
+  end
+
+  rule dql
+    '"' (ec / (!'"' .))* '"' <StringLiteral>
+  end
+
+  rule sql
+    "'" (ec / (!"'" .))* "'" <StringLiteral>
+  end
+
+  rule ec
+    '\\' .
+  end
+
+  rule c_comment
+    comment_type:('/*') (!'*/' . )* '*/' <Comment>
+  end
+
+  rule s_comment
+    comment_type:('//') (!"\n" .)* <Comment>
+  end
+end

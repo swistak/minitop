@@ -1,0 +1,49 @@
+grammar Common
+  #rule start_of_line
+
+  #end
+
+  rule end_of_line
+    &'\n'
+  end
+
+  #rule start_of_string
+    
+  #end
+
+  rule end_of_string
+    &white_space
+  end
+
+  rule white_space
+    [ \t\n\r]
+  end
+
+  rule non_white_space
+    ![ \t\n\r]
+  end
+
+  rule digit
+    [0-9]
+  end
+
+  rule non_digit
+    ![0-9]
+  end
+
+  rule character
+    [a-zA-z]
+  end
+
+  rule non_character
+    !character
+  end
+
+  rule word
+    digit / '_' / character
+  end
+
+  rule non_word
+    !word
+  end  
+end

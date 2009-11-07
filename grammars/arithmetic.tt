@@ -1,0 +1,17 @@
+grammar Arithmetic
+  rule expression
+    atom / multitive / additive
+  end
+  rule additive
+    multitive ( op:('+' / '-') multitive )*
+  end
+  rule multitive
+    atom ( op:('*' / '/') atom )*
+  end
+  rule atom
+    number / '(' additive ')'
+  end
+  rule number
+    ('-'? [1-9] [0-9]* / '0')
+  end
+end

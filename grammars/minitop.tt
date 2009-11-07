@@ -1,0 +1,30 @@
+grammar Minitop
+  rule expression
+    '(' expression ')' {
+      def to_s
+        $ec ||= 0
+        "e#{$ec}"+self.text_value
+      end
+    } / (expression_with_quantifier / escaped_letter / character_set/ letter)+
+  end
+
+  rule expression_with_quantifier
+    expression qantifier
+  end
+
+  def character_set
+    '[' . ']'
+  end
+
+  rule escaped_letter
+    '\\' letter
+  end
+
+  rule letter
+    [a-zA-Z]
+  end
+
+  rule quantifier
+    '+' / '?' / '*'
+  end
+end
