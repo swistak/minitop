@@ -61,10 +61,6 @@ Introduction to Treetop and Polygot
 Marcin Raczkowski
 \end_layout
 
-\begin_layout Institute
-Railsdog LLC, netbird.pl
-\end_layout
-
 \begin_layout Date
 RuPy, Poznań 2009
 \end_layout
@@ -165,6 +161,30 @@ Structuring a talk is a difficult task and the following structure may not
 Introduction
 \end_layout
 
+\begin_layout Subsection*
+Usefull Links
+\end_layout
+
+\begin_layout BeginFrame
+Usefull links
+\end_layout
+
+\begin_layout Itemize
+http://github.com/swistak/minitop
+\end_layout
+
+\begin_layout Itemize
+http://treetop.rubyforge.org/
+\end_layout
+
+\begin_layout Itemize
+http://rubyconf2007.confreaks.com/d1t1p5_treetop.html
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
 \begin_layout Subsection
 About RegExps and PEGs
 \end_layout
@@ -200,7 +220,7 @@ Parsing Expression Grammars are generalization of Regular Expressions
 \end_layout
 
 \begin_layout Itemize
-Pearl 6 rules - nested and named regular expressions
+Perl 6 rules - nested and named regular expressions
 \end_layout
 
 \begin_layout Pause
@@ -213,7 +233,7 @@ Limited context sensitivity
 status open
 
 \begin_layout Plain Layout
-limited look ahead in PEGs
+limited look ahead in PEGs lookaround in Regexps
 \end_layout
 
 \end_inset
@@ -697,6 +717,110 @@ puts tree.gsub("StringLiteral"){|n| "t("+n.text_value+")"}
 
 \begin_layout Plain Layout
 
+
+\backslash
+end{lstlisting} 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{frame}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Recursion Handling
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{frame}[fragile]{Recursion Handling}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[basicstyle={
+\backslash
+scriptsize},numbers=left]
+\end_layout
+
+\begin_layout Plain Layout
+
+grammar List
+\end_layout
+
+\begin_layout Plain Layout
+
+  rule list
+\end_layout
+
+\begin_layout Plain Layout
+
+    atom more_atoms:(',' atom)* {
+\end_layout
+
+\begin_layout Plain Layout
+
+      def atoms; [atom] + more_atoms.elements.map{|m| m.atom}; end
+\end_layout
+
+\begin_layout Plain Layout
+
+    }
+\end_layout
+
+\begin_layout Plain Layout
+
+  end
+\end_layout
+
+\begin_layout Plain Layout
+
+  rule atom
+\end_layout
+
+\begin_layout Plain Layout
+
+    '(' list ')' / number
+\end_layout
+
+\begin_layout Plain Layout
+
+  end
+\end_layout
+
+\begin_layout Plain Layout
+
+  rule number
+\end_layout
+
+\begin_layout Plain Layout
+
+    ('-'? [1-9] [0-9]* / '0')
+\end_layout
+
+\begin_layout Plain Layout
+
+  end
+\end_layout
+
+\begin_layout Plain Layout
+
+end
 \end_layout
 
 \begin_layout Plain Layout
@@ -716,10 +840,6 @@ end{frame}
 \end_inset
 
 
-\end_layout
-
-\begin_layout Subsection
-handling recursion
 \end_layout
 
 \begin_layout Standard
@@ -744,14 +864,57 @@ scriptsize},language=Ruby,numbers=left]
 
 \begin_layout Plain Layout
 
+class Treetop::Runtime::SyntaxNode
 \end_layout
 
 \begin_layout Plain Layout
 
+ include Enumerable
 \end_layout
 
 \begin_layout Plain Layout
 
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+parser = Treetop.load_from_string(list_grammar).new
+\end_layout
+
+\begin_layout Plain Layout
+
+if tree = parser.parse('(11,(12,13,14),(15,16))')
+\end_layout
+
+\begin_layout Plain Layout
+
+  reverser = lambda{|n|
+\end_layout
+
+\begin_layout Plain Layout
+
+    n.atoms.map{|m|
+\end_layout
+
+\begin_layout Plain Layout
+
+      m.gsub("list", &reverser)
+\end_layout
+
+\begin_layout Plain Layout
+
+    }.reverse.join(",")
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+  puts tree.gsub("list", &reverser) end
 \end_layout
 
 \begin_layout Plain Layout
@@ -796,35 +959,47 @@ Summary
 \end_layout
 
 \begin_layout Itemize
-The
+Parsing Expression Grammars a
 \color none
- 
-\color red
-first main message
-\color none
- of your talk in one or two lines.
+re generalization of Regular Expressions.
 \end_layout
 
 \begin_layout Itemize
-The
+PEGs can be used in areas that RegExps can not be used
 \color none
- 
-\color red
-second main message
-\color none
- of your talk in one or two lines.
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip0pt plus.5fill
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
-Perhaps a
-\color none
- 
-\color red
-third message
-\color none
-, but not more than that.
+Outlook
 \end_layout
 
+\begin_deeper
+\begin_layout Itemize
+Minitop
+\end_layout
+
+\begin_layout Itemize
+better reflection.
+\end_layout
+
+\end_deeper
 \begin_layout Standard
 \begin_inset Note Note
 status open
@@ -836,46 +1011,6 @@ An outlook is always optional.
 \end_inset
 
 
-\end_layout
-
-\begin_layout Section*
-\start_of_appendix
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-All of the following is optional and typically not needed.
-\end_layout
-
-\end_inset
-
-Appendix
-\end_layout
-
-\begin_layout Subsection*
-For Further Reading
-\end_layout
-
-\begin_layout BeginFrame
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-[allowframebreaks]
-\end_layout
-
-\end_inset
-
-For Further Reading
-\end_layout
-
-\begin_layout Standard
-http://rubyconf2007.confreaks.com/d1t1p5_treetop.html
-\end_layout
-
-\begin_layout Standard
-http://treetop.rubyforge.org/
 \end_layout
 
 \begin_layout EndFrame
