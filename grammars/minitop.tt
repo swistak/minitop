@@ -1,13 +1,19 @@
-grammar Minitop
+grammar MinitopParser
+  include Common
+
   rule expression
-    (special_character / anything)+
+    (inline_rule / special_character / string)+ {}
+  end
+
+  rule inline_rule
+    name:(character word+) white_space? ':' white_space? definition:(!'\\n' .)+ '\\n' <InlineRule>
   end
 
   rule special_character
-    '\S' / '\s' / '\W' / '\w' / '\A' / '\D' / '\d' / '\z' / '$' / '^'
+    ('\\S' / '\\s' / '\\W' / '\\w' / '\\A' / '\\D' / '\\d' / '\\z' / '$' / '^') <SpecialCharacter>
   end
 
-  rule anything
-    .
+  rule string
+    (![\n\\\\] .)+ { def serialize; ' "'+text_value+'" '; end }
   end
 end

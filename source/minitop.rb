@@ -32,29 +32,6 @@ module SpecialCharacter
 end
 
 Treetop.load('../grammars/common.tt')
-
-grammar = <<START
-grammar MinitopParser
-  include Common
-
-  rule expression
-    (inline_rule / special_character / string)+ {}
-  end
-
-  rule inline_rule
-    name:(character word+) white_space? ':' white_space? definition:(!'\\n' .)+ '\\n' <InlineRule>
-  end
-
-  rule special_character
-    ('\\S' / '\\s' / '\\W' / '\\w' / '\\A' / '\\D' / '\\d' / '\\z' / '$' / '^') <SpecialCharacter>
-  end
-
-  rule string
-    (![\n\\\\] .)+ { def serialize; ' "'+text_value+'" '; end }
-  end
-end
-START
-
-mt = Treetop.load_from_string(grammar).new
+mt = Treetop.load('../grammars/minitop.tt').new
 tree = mt.parse('foo\d+\W')
 puts tree.serialize

@@ -22,7 +22,7 @@ class Treetop::Runtime::SyntaxNode
     result
   end
 
-  def gsub(node, with=nil, &block)
+  def replace(node, with=nil, &block)
     unless with || block
       raise(ArgumentError, "You have to provide either a block or value to replace", caller)
     end
@@ -31,7 +31,7 @@ class Treetop::Runtime::SyntaxNode
     elsif terminal?
       serialize
     else
-      elements.map{|e| e.gsub(node, with, &block)}.join("")
+      elements.map{|e| e.replace(node, with, &block)}.join("")
     end
   end
 

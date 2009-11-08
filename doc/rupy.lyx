@@ -178,6 +178,10 @@ http://treetop.rubyforge.org/
 \end_layout
 
 \begin_layout Itemize
+http://polyglot.rubyforge.org/
+\end_layout
+
+\begin_layout Itemize
 http://rubyconf2007.confreaks.com/d1t1p5_treetop.html
 \end_layout
 
@@ -630,32 +634,17 @@ scriptsize},language=Ruby,numbers=left]
 
 \begin_layout Plain Layout
 
-require 'base'
-\end_layout
-
-\begin_layout Plain Layout
-
 class Treetop::Runtime::SyntaxNode
 \end_layout
 
 \begin_layout Plain Layout
 
-  def gsub(node, with=nil, &block)
+   def replace(node, with=nil, &block)
 \end_layout
 
 \begin_layout Plain Layout
 
-    if terminal?
-\end_layout
-
-\begin_layout Plain Layout
-
-     text_value
-\end_layout
-
-\begin_layout Plain Layout
-
-    elsif node_types.include?(node)
+    if has_type?(node)
 \end_layout
 
 \begin_layout Plain Layout
@@ -665,12 +654,32 @@ class Treetop::Runtime::SyntaxNode
 
 \begin_layout Plain Layout
 
+    elsif terminal?
+\end_layout
+
+\begin_layout Plain Layout
+
+      serialize
+\end_layout
+
+\begin_layout Plain Layout
+
     else
 \end_layout
 
 \begin_layout Plain Layout
 
-      elements.map{|e| e.gsub(node, with, &block)}.join("")
+      elements.map{|e| 
+\end_layout
+
+\begin_layout Plain Layout
+
+        e.replace(node, with, &block)
+\end_layout
+
+\begin_layout Plain Layout
+
+      }.join("")
 \end_layout
 
 \begin_layout Plain Layout
@@ -690,12 +699,16 @@ end
 
 \begin_layout Plain Layout
 
-parser = Treetop.load('minic.tt').new
 \end_layout
 
 \begin_layout Plain Layout
 
-tree = parser.parse(File.read('test.c').gsub(/
+parser = Treetop.load("../grammars/minic.tt").new
+\end_layout
+
+\begin_layout Plain Layout
+
+tree = parser.parse(File.read("../misc/test.c").gsub(/
 \backslash
 
 \backslash
@@ -706,17 +719,17 @@ n/m, ""))
 
 \begin_layout Plain Layout
 
-puts tree.gsub("Comment", '')
+puts tree.replace("Comment", '')
 \end_layout
 
 \begin_layout Plain Layout
 
-tree = parser.parse('a "123456789" b') 
+tree = parser.parse('a "123456789" b')
 \end_layout
 
 \begin_layout Plain Layout
 
-puts tree.gsub("StringLiteral"){|n| "t("+n.text_value+")"}
+puts tree.replace("StringLiteral"){|n| "t("+n.text_value+")"}
 \end_layout
 
 \begin_layout Plain Layout
@@ -779,7 +792,17 @@ grammar List
 
 \begin_layout Plain Layout
 
-      def atoms; [atom] + more_atoms.elements.map{|m| m.atom}; end
+      def atoms
+\end_layout
+
+\begin_layout Plain Layout
+
+        [atom] + more_atoms.elements.map{|m| m.atom}
+\end_layout
+
+\begin_layout Plain Layout
+
+      end
 \end_layout
 
 \begin_layout Plain Layout
@@ -883,6 +906,10 @@ end
 
 \begin_layout Plain Layout
 
+\end_layout
+
+\begin_layout Plain Layout
+
 parser = Treetop.load_from_string(list_grammar).new
 \end_layout
 
@@ -903,7 +930,7 @@ if tree = parser.parse('(11,(12,13,14),(15,16))')
 
 \begin_layout Plain Layout
 
-      m.gsub("list", &reverser)
+      m.replace("list", &reverser)
 \end_layout
 
 \begin_layout Plain Layout
@@ -918,7 +945,12 @@ if tree = parser.parse('(11,(12,13,14),(15,16))')
 
 \begin_layout Plain Layout
 
-  puts tree.gsub("list", &reverser) end
+  puts tree.replace("list", &reverser)
+\end_layout
+
+\begin_layout Plain Layout
+
+end
 \end_layout
 
 \begin_layout Plain Layout
@@ -954,6 +986,64 @@ edia.org/wiki/Perl_6_rules
 
 \end_layout
 
+\begin_layout Subsection
+Using Polyglot
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{frame}[fragile]{Using Polyglot}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[basicstyle={
+\backslash
+scriptsize},language=Ruby,numbers=left]
+\end_layout
+
+\begin_layout Plain Layout
+
+require 'polyglot'
+\end_layout
+
+\begin_layout Plain Layout
+
+require 'treetop'
+\end_layout
+
+\begin_layout Plain Layout
+
+require 'common'
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting} 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{frame}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section*
 Summary
 \end_layout
@@ -965,13 +1055,12 @@ Summary
 \begin_layout Itemize
 Parsing Expression Grammars a
 \color none
-re generalization of Regular Expressions.
+re generalization of Regular Expressions, and can be used when writing Regular
+ Expression is hard, or impossible.
 \end_layout
 
 \begin_layout Itemize
-PEGs can be used in areas that RegExps can not be used
-\color none
-.
+PEGs are usefull when you need to handle recursion or nested elements.
 \end_layout
 
 \begin_layout Standard
@@ -996,11 +1085,11 @@ Outlook
 
 \begin_deeper
 \begin_layout Itemize
-Minitop
+Work on minitop.
 \end_layout
 
 \begin_layout Itemize
-better reflection.
+Improving treetop with better reflection capabilities.
 \end_layout
 
 \end_deeper
