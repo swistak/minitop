@@ -19,10 +19,13 @@ class Treetop::Runtime::SyntaxNode
   def all_elements
     result = elements.dup
     result.each{|e| result.push(*e.elements) if e.nonterminal?}
+    result
   end
 
   def gsub(node, with=nil, &block)
-    raise ArgumentError, "You have to provide either a block or value to replace", caller unless with || block
+    unless with || block
+      raise(ArgumentError, "You have to provide either a block or value to replace", caller)
+    end
     if has_type?(node)
       with || block.call(self)
     elsif terminal?

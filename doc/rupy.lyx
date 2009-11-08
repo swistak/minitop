@@ -181,6 +181,10 @@ http://treetop.rubyforge.org/
 http://rubyconf2007.confreaks.com/d1t1p5_treetop.html
 \end_layout
 
+\begin_layout Itemize
+git://github.com/swistak/minitop.git
+\end_layout
+
 \begin_layout EndFrame
 
 \end_layout
