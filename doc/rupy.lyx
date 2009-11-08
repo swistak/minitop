@@ -276,7 +276,7 @@ A parsing expression grammar, or PEG, is a type of analytic formal grammar
 \end_layout
 
 \begin_layout Subsection
-Problems with reguar expressions
+Problems with regular expressions
 \end_layout
 
 \begin_layout BeginFrame
@@ -986,64 +986,6 @@ edia.org/wiki/Perl_6_rules
 
 \end_layout
 
-\begin_layout Subsection
-Using Polyglot
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{frame}[fragile]{Using Polyglot}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{lstlisting}[basicstyle={
-\backslash
-scriptsize},language=Ruby,numbers=left]
-\end_layout
-
-\begin_layout Plain Layout
-
-require 'polyglot'
-\end_layout
-
-\begin_layout Plain Layout
-
-require 'treetop'
-\end_layout
-
-\begin_layout Plain Layout
-
-require 'common'
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{lstlisting} 
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{frame}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Section*
 Summary
 \end_layout
@@ -1055,12 +997,18 @@ Summary
 \begin_layout Itemize
 Parsing Expression Grammars a
 \color none
-re generalization of Regular Expressions, and can be used when writing Regular
- Expression is hard, or impossible.
+re generalization of Regular Expressions
 \end_layout
 
 \begin_layout Itemize
-PEGs are usefull when you need to handle recursion or nested elements.
+
+\color none
+They can be used when writing Regular Expression top parse file is hard,
+ or impossible.
+\end_layout
+
+\begin_layout Itemize
+PEGs are useful when you need to handle recursion or nested elements.
 \end_layout
 
 \begin_layout Standard
